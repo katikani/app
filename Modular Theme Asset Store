@@ -1,0 +1,65 @@
+// themes.ts - The Modular Theme Asset Store
+export const THEME_COLLECTION = {
+  SHADOW_HUNTER: {
+    id: 'shadow_hunter',
+    palette: { primary: '#1a1a2e', secondary: '#16213e', accent: '#e94560', glow: '#4800ff' },
+    ranks: ['E', 'D', 'C', 'B', 'A', 'S', 'Monarch'],
+    background: 'portal_vortex.mp4',
+    sounds: { focusStart: 'dungeon_gate.mp3', success: 'rank_up_choir.mp3' },
+    specialEffect: 'shadow_aura_particle'
+  },
+  NINJA_RESOLVE: {
+    id: 'ninja_resolve',
+    palette: { primary: '#ff4d00', secondary: '#000000', accent: '#ffffff', glow: '#ffcc00' },
+    ranks: ['Academy', 'Genin', 'Chunin', 'Jonin', 'Hokage'],
+    background: 'falling_leaves.json',
+    sounds: { focusStart: 'shuriken_whiz.mp3', success: 'flute_victory.mp3' },
+    specialEffect: 'chakra_flare'
+  }
+};
+
+// ThemeEngine.js - React Context for State Management
+import React, { createContext, useContext, useState } from 'react';
+
+const ThemeContext = createContext();
+
+export const ThemeProvider = ({ children }) => {
+  const [currentTheme, setCurrentTheme] = useState(THEME_COLLECTION.SHADOW_HUNTER);
+  const [stats, setStats] = useState({ streak: 0, xp: 0, rankIndex: 0 });
+
+  const updateProgress = (minutes) => {
+    const newXP = stats.xp + minutes;
+    const newRankIndex = Math.floor(newXP / 100); // Simplified leveling logic
+    setStats(prev => ({ ...prev, xp: newXP, rankIndex: newRankIndex }));
+  };
+
+  return (
+    <ThemeContext.Provider value={{ currentTheme, setCurrentTheme, stats, updateProgress }}>
+      <div style={{ backgroundColor: currentTheme.palette.primary, color: '#fff', minHeight: '100vh' }}>
+        {children}
+      </div>
+    </ThemeContext.Provider>
+  );
+};
+
+// FocusTimerComponent.js
+export const FocusTimer = () => {
+  const { currentTheme, stats, updateProgress } = useContext(ThemeContext);
+  
+  return (
+    <div className="flex flex-col items-center">
+      <h2 style={{ color: currentTheme.palette.accent }}>
+        RANK: {currentTheme.ranks[stats.rankIndex] || 'Legend'}
+      </h2>
+      <div className={`aura-${currentTheme.specialEffect}`}>
+        {/* Animated Timer UI */}
+        <button 
+          onClick={() => updateProgress(25)}
+          style={{ boxShadow: `0 0 20px ${currentTheme.palette.glow}` }}
+        >
+          START MISSION
+        </button>
+      </div>
+    </div>
+  );
+};
